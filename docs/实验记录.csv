@@ -1,0 +1,1 @@
+date,method,data,epochs,imgsz,batch,map50,map50-95,params_m,flops_g,fps,weights,note
