@@ -1,0 +1,6 @@
+datasets/
+runs/
+*.pt
+*.jpg
+*.jpeg
+*.png
