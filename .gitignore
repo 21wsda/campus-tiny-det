@@ -4,3 +4,4 @@ runs/
 *.jpg
 *.jpeg
 *.png
+!docs/figures/*.png
