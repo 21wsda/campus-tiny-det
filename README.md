@@ -15,17 +15,17 @@ GPU 机器另外装带 CUDA 的 PyTorch。CPU 只能验证命令，正式训练�
 
 ## 数据放哪
 
-数据放在仓库外面，例如 `C:/Users/75804/datasets/scut_head/`（VOC 布局：`JPEGImages/`、`Annotations/`）。
+数据放在仓库外面，例如 'C:/Users/你的用户名/datasets/scut_head/'（VOC 布局：`JPEGImages/`、`Annotations/`）。
 
 - 教室数据 SCUT-HEAD PartA：https://github.com/HCIILAB/SCUT-HEAD-Dataset-Release
 - 远处人 TinyPerson：https://github.com/ucas-vg/PointTinyBenchmark/tree/master/dataset
 
 `.gitignore` 已过滤 `datasets/`、`runs/`、`*.pt`、`*.jpg`，数据和权重不进 Git。
 
-## 怎么转数据（VOC → YOLO）
+##(以下路径仅为示例，请根据自己电脑上的实际数据路径修改)怎么转数据（VOC → YOLO）
 
 ```bash
-python scripts/convert_voc_to_yolo.py --root C:/Users/75804/datasets/scut_head --out C:/Users/75804/datasets/scut_head_yolo
+python scripts/convert_voc_to_yolo.py --root C:/Users/你的用户名/datasets/scut_head --out C:/Users/你的用户名/datasets/scut_head_yolo
 ```
 
 输出目录结构（ultralytics 要求）：
@@ -39,8 +39,8 @@ scut_head_yolo/
 转换后抽查标签是否画对：
 
 ```bash
-python scripts/viz_labels.py --imgdir C:/Users/75804/datasets/scut_head_yolo/images/train \
-    --lbldir C:/Users/75804/datasets/scut_head_yolo/labels/train --n 5 --outdir docs/figures/label_check
+python scripts/viz_labels.py --imgdir C:/Users/你的用户名/datasets/scut_head_yolo/images/train \
+    --lbldir C:/Users/你的用户名/datasets/scut_head_yolo/labels/train --n 5 --outdir docs/figures/label_check
 ```
 
 ## 怎么 train
