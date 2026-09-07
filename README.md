@@ -22,7 +22,8 @@ GPU 机器另外装带 CUDA 的 PyTorch。CPU 只能验证命令，正式训练�
 
 `.gitignore` 已过滤 `datasets/`、`runs/`、`*.pt`、`*.jpg`，数据和权重不进 Git。
 
-##(以下路径仅为示例，请根据自己电脑上的实际数据路径修改)怎么转数据（VOC → YOLO）
+##怎么转数据（VOC → YOLO）
+以下路径仅为示例，请根据自己电脑上的实际数据路径修改。
 
 ```bash
 python scripts/convert_voc_to_yolo.py --root C:/Users/你的用户名/datasets/scut_head --out C:/Users/你的用户名/datasets/scut_head_yolo
