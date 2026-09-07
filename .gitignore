@@ -5,3 +5,6 @@ runs/
 *.jpeg
 *.png
 !docs/figures/*.png
+!docs/figures/*.jpg
+!docs/figures/**/*.png
+!docs/figures/**/*.jpg
