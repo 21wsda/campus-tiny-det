@@ -1,0 +1,10 @@
+# SCUT-HEAD PartA 数据集配置（工单 T05，甲主做）
+# 路径改为你本机的绝对路径，指向 convert_voc_to_yolo.py 的输出目录
+path: C:/Users/75804/datasets/scut_head_yolo
+train: images/train
+val: images/val
+
+# 类别数和类别名（人头检测，只有 1 类）
+nc: 1
+names:
+  0: head
