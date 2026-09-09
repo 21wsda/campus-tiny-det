@@ -1,3 +1,3 @@
-date,method,data,epochs,imgsz,batch,map50,map50-95,params_m,flops_g,fps,weights,note
+﻿date,method,data,epochs,imgsz,batch,map50,map50-95,params_m,flops_g,fps,weights,note
 2026-09-07,yolov8n,SCUT-HEAD-PartA,3,640,16,0.838,0.742,3.0,8.1,,runs/detect/train/weights/best.pt,smoke冒烟训练-RTX5090
-2026-09-09,yolov8n,SCUT-HEAD-PartA,100,640,16,,,,,runs/detect/train/weights/best.pt,正式训练100epoch-RTX5090
+2026-09-10,yolov8n,SCUT-HEAD-PartA,100,640,16,0.929,0.416,3.0,8.2,290.66,runs/detect/train-3/weights/best.pt,正式训练100epoch-RTX5090完成
