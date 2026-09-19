@@ -3,14 +3,21 @@
 用法: python -c "import models.register"
 之后 yaml 里写 - WeightedFuse 就能被解析
 """
-from ultralytics.nn.tasks import parse_model  # noqa: F401  确保 parse_model 已加载
-from models.weighted_fuse import WeightedFuse
-
-# 把 WeightedFuse 加进 ultralytics 的模块表
-import ultralytics.nn.modules as _modules
 import sys
 
+# 1. 导入我们的模块
+from models.weighted_fuse import WeightedFuse
+
+# 2. 把 WeightedFuse 加到 ultralytics.nn.modules 的命名空间
+import ultralytics.nn.modules as _modules
 _modules.WeightedFuse = WeightedFuse
+
+# 3. 加到 sys.modules，确保 parse_model 能找到
 sys.modules['ultralytics.nn.modules.WeightedFuse'] = WeightedFuse
+
+# 4. 也加到 ultralytics.nn.tasks 的命名空间（parse_model 从这里找模块）
+import ultralytics.nn.tasks as _tasks
+if not hasattr(_tasks, 'WeightedFuse'):
+    setattr(_tasks, 'WeightedFuse', WeightedFuse)
 
 print("[register] WeightedFuse 注册成功")

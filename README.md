@@ -125,6 +125,7 @@ campus-tiny-det/
   configs/
     scut_head.yaml          # 教室数据集配置
     yolov8n-p2.yaml         # P2 检测头配置
+    yolov8n-p2-fuse.yaml    # P2 + 加权融合配置
   scripts/
     convert_voc_to_yolo.py  # VOC → YOLO 转换（甲）
     viz_labels.py           # 标签画框检查（乙）

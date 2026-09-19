@@ -20,16 +20,23 @@ class WeightedFuse(nn.Module):
         self.num_inputs = num_inputs
         # 可学习权重，初始化为均匀
         self.weights = nn.Parameter(torch.ones(num_inputs, dtype=torch.float32))
-        # 投影层在 forward 第一次时根据实际输入通道数创建
+        # 投影层在 build_from_channels 中创建
         self.projections = None
+        self.out_channels = None
 
-    def _build_projections(self, in_channels_list, device):
-        """根据实际输入通道数创建 1x1 conv 投影层"""
+    def build_from_channels(self, in_channels_list):
+        """
+        ultralytics parse_model 会调用这个方法设置输入通道数
+        in_channels_list: 每个输入特征图的通道数列表
+        """
         total_out = sum(in_channels_list)
+        self.out_channels = total_out
         self.projections = nn.ModuleList()
         for c in in_channels_list:
             # 1x1 conv: c -> total_out
-            proj = nn.Conv2d(c, total_out, kernel_size=1, bias=False).to(device)
+            proj = nn.Conv2d(c, total_out, kernel_size=1, bias=False)
+            # 默认用 Kaiming 初始化
+            nn.init.kaiming_normal_(proj.weight, mode='fan_out', nonlinearity='relu')
             self.projections.append(proj)
 
     def forward(self, inputs):
@@ -38,10 +45,8 @@ class WeightedFuse(nn.Module):
         assert len(inputs) == self.num_inputs, \
             f"WeightedFuse 期望 {self.num_inputs} 个输入，实际收到 {len(inputs)}"
 
-        # 第一次前向时根据实际通道数建投影层
-        if self.projections is None:
-            in_channels_list = [x.shape[1] for x in inputs]
-            self._build_projections(in_channels_list, inputs[0].device)
+        assert self.projections is not None, \
+            "WeightedFuse 未初始化通道数，请先调用 build_from_channels()"
 
         # softmax 保证 w_i >= 0 且和为 1
         w = torch.softmax(self.weights, dim=0)
@@ -52,4 +57,4 @@ class WeightedFuse(nn.Module):
         return out
 
     def extra_repr(self):
-        return f"num_inputs={self.num_inputs}"
+        return f"num_inputs={self.num_inputs}, out_channels={self.out_channels}"
