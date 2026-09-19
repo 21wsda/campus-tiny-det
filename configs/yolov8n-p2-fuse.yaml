@@ -1,0 +1,58 @@
+# 基于 yolov8n-p2.yaml，把上采样对齐后的 Concat 改成 WeightedFuse（工单 T19/T20）
+# 只改已经上采样对齐之后的 Concat，不改 Conv / C2f
+# 训练前必须先 import models.register
+
+# Ultralytics YOLOv8 object detection model with P2/4 - P5/32 outputs + WeightedFuse
+
+# Parameters
+nc: 80 # number of classes (训练时由 scut_head.yaml 覆盖为 nc=1)
+scales:
+  n: [0.33, 0.25, 1024]
+  s: [0.33, 0.50, 1024]
+  m: [0.67, 0.75, 768]
+  l: [1.00, 1.00, 512]
+  x: [1.00, 1.25, 512]
+
+# YOLOv8.0 backbone（和 p2 一样，不换）
+backbone:
+  # [from, repeats, module, args]
+  - [-1, 1, Conv, [64, 3, 2]] # 0-P1/2
+  - [-1, 1, Conv, [128, 3, 2]] # 1-P2/4
+  - [-1, 3, C2f, [128, True]]
+  - [-1, 1, Conv, [256, 3, 2]] # 3-P3/8
+  - [-1, 6, C2f, [256, True]]
+  - [-1, 1, Conv, [512, 3, 2]] # 5-P4/16
+  - [-1, 6, C2f, [512, True]]
+  - [-1, 1, Conv, [1024, 3, 2]] # 7-P5/32
+  - [-1, 3, C2f, [1024, True]]
+  - [-1, 1, SPPF, [1024, 5]] # 9
+
+# YOLOv8.0-p2 head + WeightedFuse
+head:
+  # top-down path
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 6], 1, WeightedFuse, [2]] # cat backbone P4 → 改加权
+  - [-1, 3, C2f, [512]] # 12
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 4], 1, WeightedFuse, [2]] # cat backbone P3 → 改加权
+  - [-1, 3, C2f, [256]] # 15 (P3/8-small)
+
+  - [-1, 1, nn.Upsample, [None, 2, "nearest"]]
+  - [[-1, 2], 1, WeightedFuse, [2]] # cat backbone P2 → 改加权
+  - [-1, 3, C2f, [128]] # 18 (P2/4-xsmall)
+
+  # bottom-up path
+  - [-1, 1, Conv, [128, 3, 2]]
+  - [[-1, 15], 1, WeightedFuse, [2]] # cat head P3 → 改加权
+  - [-1, 3, C2f, [256]] # 21 (P3/8-small)
+
+  - [-1, 1, Conv, [256, 3, 2]]
+  - [[-1, 12], 1, WeightedFuse, [2]] # cat head P4 → 改加权
+  - [-1, 3, C2f, [512]] # 24 (P4/16-medium)
+
+  - [-1, 1, Conv, [512, 3, 2]]
+  - [[-1, 9], 1, WeightedFuse, [2]] # cat head P5 → 改加权
+  - [-1, 3, C2f, [1024]] # 27 (P5/32-large)
+
+  - [[18, 21, 24, 27], 1, Detect, [nc]] # Detect(P2, P3, P4, P5)
