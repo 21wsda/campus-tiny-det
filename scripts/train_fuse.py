@@ -9,6 +9,14 @@
   python scripts/train_fuse.py --from-scratch
 """
 import argparse
+import os
+import sys
+
+# 把仓库根目录加到 Python 路径，确保能 import models
+_REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _REPO_ROOT not in sys.path:
+    sys.path.insert(0, _REPO_ROOT)
+
 import models.register  # noqa: F401  必须先注册
 
 from ultralytics import YOLO
