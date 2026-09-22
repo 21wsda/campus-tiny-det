@@ -1,6 +1,8 @@
 """
 完整方法训练入口: P2 + WeightedFuse
-先注册模块，再用 YOLO 类加载 fuse yaml 开始训练
+1. 用标准 Concat 的 yaml 构建模型（让 parse_model 正常工作）
+2. 遍历模型，把所有 Concat 层替换成 WeightedFuse
+3. 加载预训练权重，开始训练
 
 用法（在仓库根目录，GPU机器上执行）：
   python scripts/train_fuse.py
@@ -12,14 +14,33 @@ import argparse
 import os
 import sys
 
-# 把仓库根目录加到 Python 路径，确保能 import models
+# 把仓库根目录加到 Python 路径
 _REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _REPO_ROOT not in sys.path:
     sys.path.insert(0, _REPO_ROOT)
 
-import models.register  # noqa: F401  必须先注册
-
+import torch.nn as nn
 from ultralytics import YOLO
+from ultralytics.nn.modules import Concat
+from models.weighted_fuse import WeightedFuse
+
+
+def replace_concat_with_fuse(model):
+    """遍历模型，把所有 Concat 层替换成 WeightedFuse"""
+    count = 0
+    # model.model 是 nn.Sequential
+    for i, layer in enumerate(model.model):
+        if isinstance(layer, Concat):
+            # 创建 WeightedFuse，参数会在第一次 forward 时自动初始化
+            fuse = WeightedFuse(dimension=layer.d)
+            # 把新模块移到和原层相同的 device
+            device = next(layer.parameters()).device if len(list(layer.parameters())) > 0 else next(model.parameters()).device
+            fuse = fuse.to(device)
+            model.model[i] = fuse
+            count += 1
+            print(f"  [replace] 层 {i}: Concat → WeightedFuse")
+    print(f"[replace] 共替换 {count} 个 Concat 层为 WeightedFuse")
+    return model
 
 
 def main():
@@ -44,13 +65,24 @@ def main():
     else:
         print(f"[train_fuse] 从 P2 预训练权重 {args.pretrained} 微调")
 
-    # 加载自定义模型配置
+    # 1. 用标准 Concat 的 yaml 构建模型
+    print("[train_fuse] 构建模型（标准Concat）...")
     model = YOLO(args.config)
 
-    # 加载预训练权重（如果有）
-    if args.pretrained and args.pretrained != "yolov8n.pt":
-        model = model.load(args.pretrained)
+    # 2. 把所有 Concat 替换成 WeightedFuse
+    print("[train_fuse] 替换 Concat → WeightedFuse...")
+    model = replace_concat_with_fuse(model)
 
+    # 3. 加载预训练权重（Concat没有可学习参数，替换不影响其他层权重加载）
+    if args.pretrained and args.pretrained != "yolov8n.pt":
+        if os.path.exists(args.pretrained):
+            print(f"[train_fuse] 加载预训练权重 {args.pretrained}...")
+            model = model.load(args.pretrained)
+        else:
+            print(f"[train_fuse] 警告：预训练权重 {args.pretrained} 不存在，从随机初始化开始")
+
+    # 4. 开始训练
+    print("[train_fuse] 开始训练...")
     model.train(
         data=args.data,
         imgsz=args.imgsz,
