@@ -28,15 +28,16 @@ from models.weighted_fuse import WeightedFuse
 def replace_concat_with_fuse(model):
     """遍历模型，把所有 Concat 层替换成 WeightedFuse"""
     count = 0
-    # model.model 是 nn.Sequential
-    for i, layer in enumerate(model.model):
+    # YOLO.model 是 DetectionModel，DetectionModel.model 才是 Sequential（层列表）
+    layers = model.model.model
+    for i, layer in enumerate(layers):
         if isinstance(layer, Concat):
             # 创建 WeightedFuse，参数会在第一次 forward 时自动初始化
             fuse = WeightedFuse(dimension=layer.d)
-            # 把新模块移到和原层相同的 device
-            device = next(layer.parameters()).device if len(list(layer.parameters())) > 0 else next(model.parameters()).device
+            # 把新模块移到和模型相同的 device
+            device = next(model.parameters()).device
             fuse = fuse.to(device)
-            model.model[i] = fuse
+            layers[i] = fuse
             count += 1
             print(f"  [replace] 层 {i}: Concat → WeightedFuse")
     print(f"[replace] 共替换 {count} 个 Concat 层为 WeightedFuse")
