@@ -23,6 +23,7 @@ import torch.nn as nn
 from ultralytics import YOLO
 from ultralytics.nn.modules import Concat
 from models.weighted_fuse import WeightedFuse
+import models.register  # noqa: F401  必须先注册，训练时重新构建模型才能找到WeightedFuse
 
 
 def replace_concat_with_fuse(model):
