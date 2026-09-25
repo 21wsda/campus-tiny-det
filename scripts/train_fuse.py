@@ -26,7 +26,7 @@ from models.weighted_fuse import WeightedFuse
 
 
 def replace_concat_with_fuse(model):
-    """遍历模型，把所有 Concat 层替换成 WeightedFuse"""
+    """遍历模型，把所有 Concat 层替换成 WeightedFuse，同时修改 yaml 配置"""
     count = 0
     # YOLO.model 是 DetectionModel，DetectionModel.model 才是 Sequential（层列表）
     layers = model.model.model
@@ -40,6 +40,18 @@ def replace_concat_with_fuse(model):
             layers[i] = fuse
             count += 1
             print(f"  [replace] 层 {i}: Concat → WeightedFuse")
+
+    # 关键：同时修改模型的 yaml 配置，把 Concat 改成 WeightedFuse
+    # 这样保存的权重文件里记录的配置就是 WeightedFuse，加载时不会变回 Concat
+    if hasattr(model.model, 'yaml') and model.model.yaml is not None:
+        yaml_cfg = model.model.yaml
+        if 'head' in yaml_cfg:
+            for layer_def in yaml_cfg['head']:
+                # layer_def 格式: [from, repeats, module, args]
+                if len(layer_def) >= 3 and layer_def[2] == 'Concat':
+                    layer_def[2] = 'WeightedFuse'
+        print("[replace] 已同步修改 yaml 配置中的 Concat → WeightedFuse")
+
     print(f"[replace] 共替换 {count} 个 Concat 层为 WeightedFuse")
     return model
 

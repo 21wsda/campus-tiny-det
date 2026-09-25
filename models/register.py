@@ -1,6 +1,10 @@
 """
 注册自定义模块到 ultralytics
-用法: python -c "import models.register"
+用法（训练和推理前都要执行）:
+  python -c "import models.register"
+
+关键：把 Concat 替换成 WeightedFuse，这样 parse_model 里的 `m is Concat`
+判断会为 True，能正确处理多输入（from 是列表的情况）。
 """
 import sys
 
@@ -11,7 +15,17 @@ from models.weighted_fuse import WeightedFuse
 import ultralytics.nn.modules as _modules
 _modules.WeightedFuse = WeightedFuse
 
-# 3. 加到 sys.modules
-sys.modules['ultralytics.nn.modules.WeightedFuse'] = WeightedFuse
+# 3. 关键：把 Concat 替换成 WeightedFuse
+# 这样 parse_model 会把 WeightedFuse 当成 Concat 处理，正确计算输出通道数
+_modules.Concat = WeightedFuse
 
-print("[register] WeightedFuse 注册成功")
+# 4. 加到 sys.modules
+sys.modules['ultralytics.nn.modules.WeightedFuse'] = WeightedFuse
+sys.modules['ultralytics.nn.modules.Concat'] = WeightedFuse
+
+# 5. 也加到 ultralytics.nn.tasks 的命名空间
+import ultralytics.nn.tasks as _tasks
+if not hasattr(_tasks, 'WeightedFuse'):
+    setattr(_tasks, 'WeightedFuse', WeightedFuse)
+
+print("[register] WeightedFuse 注册成功（已替换Concat，训练和推理通用）")
