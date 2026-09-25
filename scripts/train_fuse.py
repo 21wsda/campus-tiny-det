@@ -3,6 +3,8 @@
 1. 用标准 Concat 的 yaml 构建模型（让 parse_model 正常工作）
 2. 遍历模型，把所有 Concat 层替换成 WeightedFuse
 3. 加载预训练权重，开始训练
+4. 不修改 yaml 配置，避免训练时重新构建模型出错
+5. 推理时用 scripts/predict_fuse.py，里面也做同样的替换
 
 用法（在仓库根目录，GPU机器上执行）：
   python scripts/train_fuse.py
@@ -23,36 +25,21 @@ import torch.nn as nn
 from ultralytics import YOLO
 from ultralytics.nn.modules import Concat
 from models.weighted_fuse import WeightedFuse
-import models.register  # noqa: F401  必须先注册，训练时重新构建模型才能找到WeightedFuse
+import models.register  # noqa: F401  必须先注册
 
 
 def replace_concat_with_fuse(model):
-    """遍历模型，把所有 Concat 层替换成 WeightedFuse，同时修改 yaml 配置"""
+    """遍历模型，把所有 Concat 层替换成 WeightedFuse"""
     count = 0
-    # YOLO.model 是 DetectionModel，DetectionModel.model 才是 Sequential（层列表）
     layers = model.model.model
     for i, layer in enumerate(layers):
         if isinstance(layer, Concat):
-            # 创建 WeightedFuse，参数会在第一次 forward 时自动初始化
             fuse = WeightedFuse(dimension=layer.d)
-            # 把新模块移到和模型相同的 device
             device = next(model.parameters()).device
             fuse = fuse.to(device)
             layers[i] = fuse
             count += 1
             print(f"  [replace] 层 {i}: Concat → WeightedFuse")
-
-    # 关键：同时修改模型的 yaml 配置，把 Concat 改成 WeightedFuse
-    # 这样保存的权重文件里记录的配置就是 WeightedFuse，加载时不会变回 Concat
-    if hasattr(model.model, 'yaml') and model.model.yaml is not None:
-        yaml_cfg = model.model.yaml
-        if 'head' in yaml_cfg:
-            for layer_def in yaml_cfg['head']:
-                # layer_def 格式: [from, repeats, module, args]
-                if len(layer_def) >= 3 and layer_def[2] == 'Concat':
-                    layer_def[2] = 'WeightedFuse'
-        print("[replace] 已同步修改 yaml 配置中的 Concat → WeightedFuse")
-
     print(f"[replace] 共替换 {count} 个 Concat 层为 WeightedFuse")
     return model
 
@@ -106,6 +93,7 @@ def main():
     )
 
     print(f"[train_fuse] 训练完成。结果在 runs/detect/{args.name}/")
+    print("[train_fuse] 推理时请用 scripts/predict_fuse.py，不要直接 yolo predict")
     print("[train_fuse] 记得把结果填进 docs/实验记录.csv，method=yolov8n-p2-fuse")
 
 
