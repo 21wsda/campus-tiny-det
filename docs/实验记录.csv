@@ -6,3 +6,4 @@
 2026-09-25,yolov8n,TinyPerson,100,640,16,0.127,0.0367,3.0,8.1,,runs/detect/tinyperson_n/weights/best.pt,TinyPerson官方n 100epoch完成 AutoDL RTX5090D约6分钟
 2026-09-25,yolov8s,SCUT-HEAD-PartA,100,640,16,0.940,0.433,11.13,28.4,228.51,runs/detect/yolov8s/weights/best.pt,对比实验YOLOv8s 100epoch完成 AutoDL RTX5090D约11分钟
 2026-09-25,yolov5nu,SCUT-HEAD-PartA,100,640,16,0.921,0.412,2.50,7.1,226.87,runs/detect/yolov5nu/weights/best.pt,对比实验YOLOv5n 100epoch完成 AutoDL RTX5090D约11分钟
+2026-09-27,yolov8n-p2-fuse,TinyPerson,100,640,8,0.124,0.0363,3.31,13.9,,runs/detect/tinyperson-fuse/weights/best.pt,TinyPerson完整方法P2+加权100epoch完成 AutoDL RTX3080Ti约25分钟；从官方yolov8n.pt从头训练
