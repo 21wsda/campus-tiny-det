@@ -8,3 +8,6 @@ runs/
 !docs/figures/*.jpg
 !docs/figures/**/*.png
 !docs/figures/**/*.jpg
+
+# macOS 垃圾文件
+.DS_Store
