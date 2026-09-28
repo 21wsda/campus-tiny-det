@@ -31,6 +31,23 @@ def count_fuse(model):
     return sum(1 for layer in model.model.model if isinstance(layer, WeightedFuse))
 
 
+def fix_fuse_attributes(model):
+    """直接加载的权重里，WeightedFuse层可能缺f/i等记账属性，补上"""
+    count = 0
+    layers = model.model.model
+    for i, layer in enumerate(layers):
+        if isinstance(layer, WeightedFuse):
+            if not hasattr(layer, 'f'):
+                layer.f = -1
+            if not hasattr(layer, 'i'):
+                layer.i = i
+            if not hasattr(layer, 'type'):
+                layer.type = type(layer)
+            count += 1
+    print(f"[predict_fuse] 修复 {count} 个 WeightedFuse 层的记账属性")
+    return model
+
+
 def replace_concat_with_fuse(model):
     """遍历模型，把所有 Concat 层替换成 WeightedFuse"""
     count = 0
@@ -68,6 +85,7 @@ def load_fuse_model(weights, config, imgsz):
         n = count_fuse(model)
         if n > 0:
             print(f"[predict_fuse] 直接加载成功，加权层 {n} 个")
+            model = fix_fuse_attributes(model)
             return model
         print("[predict_fuse] 警告：直接加载后图里没有加权层，改用重建方式")
     except Exception as err:
