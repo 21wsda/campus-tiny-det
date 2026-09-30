@@ -95,6 +95,16 @@ yolo val model=runs/detect/train-3/weights/best.pt data=configs/scut_head.yaml i
 
 把 `model=` 换成你要评估的权重路径。
 
+### fuse 模型 val
+
+fuse 权重不能直接 `yolo val`（会变回 Concat），用脚本：
+
+```bash
+python scripts/predict_fuse.py --weights runs/detect/train-fuse-v2-4/weights/best.pt --source 数据val图片目录 --conf 0.001 --save-txt
+```
+
+然后用 ultralytics 的 val 逻辑评估，或直接看训练时保存的 results.csv。
+
 ## 怎么测速
 
 所有 FPS 必须在同一台机器测（默认 AutoDL RTX 5090）：
@@ -117,6 +127,16 @@ yolo predict model=runs/detect/train-3/weights/best.pt source=./test.jpg conf=0.
 yolo predict model=runs/detect/train-3/weights/best.pt source=./val图片文件夹 conf=0.25 save=True
 ```
 
+### fuse 模型预测
+
+**必须用 `scripts/predict_fuse.py`，不要直接 `yolo predict`**（直接加载会变回普通 Concat，没有加权融合）：
+
+```bash
+python scripts/predict_fuse.py --weights runs/detect/train-fuse-v2-4/weights/best.pt --source 图片或文件夹 --conf 0.25
+```
+
+结果保存在 `runs/detect/predict/`。
+
 ## 仓库结构
 
 ```
@@ -124,6 +144,7 @@ campus-tiny-det/
   README.md
   configs/
     scut_head.yaml          # 教室数据集配置
+    tinyperson.yaml         # TinyPerson数据集配置
     yolov8n-p2.yaml         # P2 检测头配置
     yolov8n-p2-fuse.yaml    # P2 + 加权融合配置
   scripts/
@@ -132,12 +153,14 @@ campus-tiny-det/
     plot_box_size.py        # 框尺寸直方图（乙）
     measure_speed.py        # FPS 测速（丙）
     train_fuse.py           # 完整方法训练入口（甲）
+    predict_fuse.py         # fuse模型推理脚本（甲，必须用这个）
   models/
     weighted_fuse.py        # 加权融合模块（乙）
     register.py              # 模块注册（乙）
   docs/
     实验记录.csv             # 一行实验一行，谁训谁填
     实验验证.md              # 实验设置、数据、对比表（甲）
+    风险.md                  # 缺口与风险清单（甲）
     figures/                 # 截图、直方图、对比图
   .gitignore
 ```
