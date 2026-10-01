@@ -2,9 +2,24 @@
 
 面向校园监控的轻量小目标检测。以 YOLOv8n 为底座，在颈部接 P2 并改加权融合，不换骨干。
 
+仓库地址：https://github.com/21wsda/campus-tiny-det
+
+## 快速开始
+
+```bash
+git clone https://github.com/21wsda/campus-tiny-det.git
+cd campus-tiny-det
+```
+
+> 国内机器（如 AutoDL）直连 GitHub 可能失败，先开加速：
+> ```bash
+> source /etc/network_turbo
+> ```
+> 反复 `early EOF` 时改用 `--depth 1`，或从本地上传 zip 包解压。
+
 ## 环境配置
 
-Python 3.10 或 3.11（不要 3.13）。
+Python 3.10–3.12 均可（不要 3.13）。
 
 ```bash
 pip install ultralytics opencv-python matplotlib
@@ -15,12 +30,23 @@ GPU 机器另外装带 CUDA 的 PyTorch。CPU 只能验证命令，正式训练�
 
 ## 数据放哪
 
-数据放在仓库外面，例如 `C:/Users/你的用户名/datasets/scut_head/`（VOC 布局：`JPEGImages/`、`Annotations/`）。
+数据放在仓库外面，例如：
+- Windows：`C:/Users/你的用户名/datasets/scut_head/`
+- Linux：`/root/autodl-tmp/datasets/scut_head/`
+
+（VOC 布局：`JPEGImages/`、`Annotations/`）
 
 - 教室数据 SCUT-HEAD PartA：https://github.com/HCIILAB/SCUT-HEAD-Dataset-Release
 - 远处人 TinyPerson：https://github.com/ucas-vg/PointTinyBenchmark/tree/master/dataset
 
 `.gitignore` 已过滤 `datasets/`、`runs/`、`*.pt`、`*.jpg`，数据和权重不进 Git。
+
+## 权重下载
+
+训练好的权重不进 Git，从网盘下载：
+- 五个教室权重（n/s/v5n/p2/fuse）+ 两个 TinyPerson 权重
+- 下载后放在 `runs/detect/` 对应目录，或直接用绝对路径指定
+- 网盘链接见 `docs/网盘交付规划.md`（交付前更新）
 
 ## 怎么转数据（VOC → YOLO）
 
@@ -48,6 +74,13 @@ python scripts/viz_labels.py --imgdir C:/Users/你的用户名/datasets/scut_hea
 ## 怎么 train
 
 先改 `configs/scut_head.yaml` 里的 `path` 为你本机的 YOLO 格式数据目录绝对路径。
+
+Linux 一键修改（把路径换成你的）：
+```bash
+sed -i 's|path: C:/Users/75804/datasets/scut_head_yolo|path: /root/autodl-tmp/datasets/scut_head_yolo|' configs/scut_head.yaml
+```
+
+Windows 用记事本打开 `configs/scut_head.yaml`，手动改 `path` 行。
 
 冒烟训练（3 epoch，只验证流程）：
 
