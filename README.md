@@ -193,10 +193,24 @@ campus-tiny-det/
   docs/
     实验记录.csv             # 一行实验一行，谁训谁填
     实验验证.md              # 实验设置、数据、对比表（甲）
+    算法设计草稿_乙.md       # 算法段正文（乙）
+    答辩三句_乙.md           # PPT 第一页三句话（乙）
     风险.md                  # 缺口与风险清单（甲）
-    figures/                 # 截图、直方图、对比图
+    figures/
+      neck_p2.png            # ★ 结构图（乙画，丙直接用，勿重画）
+      failure_page.png       # 失败一页
+      cmp_n_vs_p2/           # n vs P2 左右对比
   .gitignore
 ```
+
+## 给丙：结构图在哪
+
+技术方案 / PPT / 视频「改了脖子」那一段，直接用这张，不要重画：
+
+- 路径：[`docs/figures/neck_p2.png`](docs/figures/neck_p2.png)
+- 说明：[`docs/算法设计草稿_乙.md`](docs/算法设计草稿_乙.md) 第 2 节
+- 重画命令：`python scripts/draw_neck_p2.py`
+
 
 ## 实验记录
 
