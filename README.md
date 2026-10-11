@@ -46,7 +46,7 @@ GPU 机器另外装带 CUDA 的 PyTorch。CPU 只能验证命令，正式训练�
 训练好的权重不进 Git，从网盘下载：
 - 五个教室权重（n/s/v5n/p2/fuse）+ 两个 TinyPerson 权重
 - 下载后放在 `runs/detect/` 对应目录，或直接用绝对路径指定
-- 网盘链接见 `docs/网盘交付规划.md`（交付前更新）
+- 百度网盘：https://pan.baidu.com/s/1uEAKGWk3z7IsuMZLaYlvjg?pwd=25zp 提取码 `25zp`（根目录 `campus-tiny-det-交付`）
 
 ## 怎么转数据（VOC → YOLO）
 
@@ -191,25 +191,25 @@ campus-tiny-det/
     weighted_fuse.py        # 加权融合模块（乙）
     register.py              # 模块注册（乙）
   docs/
+    技术方案.pdf             # 最新技术方案
+    答辩PPT.pdf              # 最新答辩 PPT
+    视频.mp4                 # 演示视频
+    简介.md                  # 报名表简介
     实验记录.csv             # 一行实验一行，谁训谁填
-    实验验证.md              # 实验设置、数据、对比表（甲）
-    算法设计草稿_乙.md       # 算法段正文（乙）
-    答辩三句_乙.md           # PPT 第一页三句话（乙）
-    风险.md                  # 缺口与风险清单（甲）
+    实验验证.md              # 实验设置、数据、对比表
     figures/
-      neck_p2.png            # ★ 结构图（乙画，丙直接用，勿重画）
+      neck_p2.png            # 颈部结构图
       failure_page.png       # 失败一页
       cmp_n_vs_p2/           # n vs P2 左右对比
   .gitignore
 ```
 
-## 给丙：结构图在哪
+## 交付材料
 
-技术方案 / PPT / 视频「改了脖子」那一段，直接用这张，不要重画：
-
-- 路径：[`docs/figures/neck_p2.png`](docs/figures/neck_p2.png)
-- 说明：[`docs/算法设计草稿_乙.md`](docs/算法设计草稿_乙.md) 第 2 节
-- 重画命令：`python scripts/draw_neck_p2.py`
+- 技术方案：[`docs/技术方案.pdf`](docs/技术方案.pdf)
+- 答辩 PPT：[`docs/答辩PPT.pdf`](docs/答辩PPT.pdf)
+- 演示视频：[`docs/视频.mp4`](docs/视频.mp4)
+- 颈部结构图：[`docs/figures/neck_p2.png`](docs/figures/neck_p2.png)
 
 
 ## 实验记录
